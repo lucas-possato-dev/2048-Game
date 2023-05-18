@@ -1,6 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const Game = () => {
+  const [gameOver, setGameOver] = useState(false);
+  const [gameWon, setGameWon] = useState(false);
   const el = useRef<HTMLDivElement>(null);
   let score = 0;
 
@@ -136,6 +138,19 @@ const Game = () => {
     renderList.push({ start: -1, end: cellIndex, value: 2, double: false });
   };
 
+  const checkGameOver = () => {
+    const isFilled = cellv.every((cell) => cell !== 0);
+    const has2048 = cellv.some((cell) => cell === 2048);
+
+    if (isFilled) {
+      setGameOver(true);
+    }
+
+    if (has2048) {
+      setGameWon(true);
+    }
+  };
+
   useEffect(() => {
     const grid = el.current!.firstChild;
 
@@ -167,14 +182,25 @@ const Game = () => {
       if (moveCells(e.key)) {
         generatCell();
         renderCells();
+        checkGameOver();
       }
     }
   };
 
   return (
     <div className="w-96 h-96 relative" ref={el}>
+      {gameOver && (
+        <div className="fixed font-semibold top-2 right-2">
+          Game Over - Score: {score}
+        </div>
+      )}
+      {gameWon && (
+        <div className="fixed font-semibold top-2 right-2">
+          Parabéns, você ganhou! - Score: {score}
+        </div>
+      )}
       <div className="grid"></div>
-      <div className="fixed font-semibold top-2 right-2">Score: 0</div>
+      <div className="fixed font-semibold top-2 right-2">Score: {score}</div>
       <div className="cells"></div>
     </div>
   );
