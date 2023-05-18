@@ -4,8 +4,6 @@ const Game = () => {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [reload, setReload] = useState(false);
-  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
-  const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 });
   const el = useRef<HTMLDivElement>(null);
   let score = 0;
 
@@ -196,65 +194,6 @@ const Game = () => {
     }
   };
 
-  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
-    const touch = event.touches[0];
-    setTouchStart({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const touch = event.touches[0];
-    setTouchEnd({ x: touch.clientX, y: touch.clientY });
-  };
-
-  const handleTouchEnd = () => {
-    const dx = touchEnd.x - touchStart.x;
-    const dy = touchEnd.y - touchStart.y;
-    const threshold = 64;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-      if (Math.abs(dx) > threshold) {
-        if (dx > 0) {
-          // Swipe right
-          renderList.splice(0);
-          if (moveCells("ArrowRight")) {
-            generatCell();
-            renderCells();
-            checkGameOver();
-          }
-        } else {
-          // Swipe left
-          renderList.splice(0);
-          if (moveCells("ArrowLeft")) {
-            generatCell();
-            renderCells();
-            checkGameOver();
-          }
-        }
-      }
-    } else {
-      if (Math.abs(dy) > threshold) {
-        if (dy > 0) {
-          // Swipe down
-          renderList.splice(0);
-          if (moveCells("ArrowDown")) {
-            generatCell();
-            renderCells();
-            checkGameOver();
-          }
-        } else {
-          // Swipe up
-          renderList.splice(0);
-          if (moveCells("ArrowUp")) {
-            generatCell();
-            renderCells();
-            checkGameOver();
-          }
-        }
-      }
-    }
-  };
-
   const handleRestart = () => {
     setReload(true);
     window.location.reload();
@@ -286,13 +225,7 @@ const Game = () => {
           </div>
         </>
       )}
-      <div
-        className="w-96 h-96 relative"
-        ref={el}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
+      <div className="w-96 h-96 relative" ref={el}>
         <div className="grid"></div>
         <div className="fixed font-semibold top-2 right-2">Score: {score}</div>
         <div className="cells"></div>
