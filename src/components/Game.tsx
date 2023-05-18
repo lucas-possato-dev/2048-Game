@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 const Game = () => {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
+  const [reload, setReload] = useState(false);
   const el = useRef<HTMLDivElement>(null);
   let score = 0;
 
@@ -16,6 +17,10 @@ const Game = () => {
   }[] = [];
 
   const moveCells = (direction: string): boolean => {
+    if (gameOver || gameWon) {
+      return false;
+    }
+
     const dirmap: number[][] = [
       [-1, 0],
       [0, 1],
@@ -38,7 +43,7 @@ const Game = () => {
           if (ti < 0 || ti >= 4 || tj < 0 || tj >= 4) break;
 
           if (cellv[ti * 4 + tj] !== 0) {
-            if (cellv[ci * 4 + cj] == cellv[ti * 4 + tj]) {
+            if (cellv[ci * 4 + cj] === cellv[ti * 4 + tj]) {
               double = true;
               ni = ti;
               nj = tj;
@@ -112,11 +117,13 @@ const Game = () => {
         "cursor-pointer transition-all rounded-lg duration-300 text-center text-4xl text-rose-800 flex items-center justify-center font-bold box-border w-24 h-24 border-2 bg-amber-500 absolute";
       theCell.innerHTML = it.value.toString();
 
-      if (it.start == -1) theCell.style.transform = `translate(-200px, -200px)`;
-      else
+      if (it.start === -1) {
+        theCell.style.transform = `translate(-200px, -200px)`;
+      } else {
         theCell.style.transform = `translate(${(it.start % 4) * 96}px, ${
           Math.floor(it.start / 4) * 96
         }px)`;
+      }
 
       setTimeout(() => {
         theCell.style.transform = `translate(${(it.end % 4) * 96}px, ${
@@ -132,7 +139,7 @@ const Game = () => {
     let cellIndex;
     while (true) {
       cellIndex = Math.floor(Math.random() * 16);
-      if (cellv[cellIndex] == 0) break;
+      if (cellv[cellIndex] === 0) break;
     }
     cellv[cellIndex] = 2;
     renderList.push({ start: -1, end: cellIndex, value: 2, double: false });
@@ -174,7 +181,7 @@ const Game = () => {
     generatCell();
 
     renderCells();
-  }, []);
+  }, [reload]);
 
   document.body.onkeydown = (e: KeyboardEvent) => {
     if (e.key.indexOf("Arrow") >= 0) {
@@ -187,22 +194,43 @@ const Game = () => {
     }
   };
 
+  const handleRestart = () => {
+    setReload(true);
+    window.location.reload();
+  };
+
   return (
-    <div className="w-96 h-96 relative" ref={el}>
+    <>
       {gameOver && (
-        <div className="fixed font-semibold top-2 right-2">
-          Game Over - Score: {score}
-        </div>
+        <>
+          <div className="fixed font-semibold top-2 right-24">Game Over -</div>
+          <div>
+            <button
+              className="bg-red-500 p-4 text-white rounded-lg mb-4 hover:bg-red-600"
+              onClick={handleRestart}
+            >
+              Jogar Novamente
+            </button>
+          </div>
+        </>
       )}
+
       {gameWon && (
-        <div className="fixed font-semibold top-2 right-2">
-          Parabéns, você ganhou! - Score: {score}
-        </div>
+        <>
+          <div className="fixed font-semibold top-2 right-24">Parabéns! -</div>
+          <div>
+            <button className="" onClick={handleRestart}>
+              Jogar Novamente
+            </button>
+          </div>
+        </>
       )}
-      <div className="grid"></div>
-      <div className="fixed font-semibold top-2 right-2">Score: {score}</div>
-      <div className="cells"></div>
-    </div>
+      <div className="w-96 h-96 relative" ref={el}>
+        <div className="grid"></div>
+        <div className="fixed font-semibold top-2 right-2">Score: {score}</div>
+        <div className="cells"></div>
+      </div>
+    </>
   );
 };
 
